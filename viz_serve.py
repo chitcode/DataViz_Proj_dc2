@@ -14,11 +14,12 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 # FILE_PATH = "/Users/chitrasen/workspace_python/class_works/CS765/"
 FILE_PATH = "data/"
-
+print("loading data from file")
 cd_data = None
 cd_data = pd.read_csv(path.join(FILE_PATH,"CDs_and_Vinyl_5.csv.gz"))
 cd_data.columns = [c.strip() for c in cd_data.columns]
 data_cache = {}
+print("data loaded")
 
 @app.route('/')
 @app.route('/index')
@@ -246,4 +247,4 @@ def calcualte_moving_averages_single(prod):
 if __name__ == '__main__':
     init();
     os.environ["FLASK_ENV"] = 'development'
-    app.run(port=5000)
+    app.run(threaded=True,port=5000)
