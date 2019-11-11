@@ -4,7 +4,7 @@ function updateViz(){
   prod_id = document.getElementById('prod_id').value;
   max_conn = document.getElementById('max_conn').value;
   //alert(max_conn);
-  if(prod_id != null || prod_id != ""){
+  if(prod_id !== null && prod_id !== ""){
     var request = new XMLHttpRequest();
     const url='/getnodes?prodId='+prod_id+'&maxConn='+max_conn;
     console.log(url);

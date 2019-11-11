@@ -12,12 +12,17 @@
 
 
 </head>
-<body>
-  <div style="width:800px; margin:0 auto;">
-  <table>
+<body >
+  <div>
+  <table width="40%" style="margin: 0 auto; solid;text-align:center">
+  <tr>
+    <td colspan="7">
+      <div id="titleText">Explore Product-User Connections</div>
+    </td>
+  </tr>
   <tr>
     <td>
-      Max. Connection
+      Top Connection
     </td>
     <td>
       <select id="max_conn">
@@ -41,7 +46,7 @@
     <td>
       <input type="button", value="Submit", onclick="updateViz();">
     </td>
-    <td>
+    <td style="width:25px">
       <img src="/static/index.fidget-spinner.gif" id="loader" style="width:20px;height:20px;">
     </td>
   </tr>

@@ -8,6 +8,8 @@
   cursor: pointer;
 } */
 
+
+body { width:100%; }
 #submit {
  color: #fff;
  font-size: 0;
@@ -35,6 +37,11 @@
   stroke-width: 2px;
 }
 
+.titleText{
+  text-align: center;
+  vertical-align: middle;
+  line-height: 90px;
+}
 div.tooltip {
     position: absolute;
     text-align: center;
