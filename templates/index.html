@@ -1,0 +1,60 @@
+<html>
+<head>
+  <title>
+    Product Flow
+  </title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width">
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <!-- Load billboard.js with base(or theme) style -->
+  <script src="/static/billboard.min.js"></script>
+  <link rel="stylesheet" href="/static/billboard.min.css">
+
+
+</head>
+<body>
+  <div style="width:800px; margin:0 auto;">
+  <table>
+  <tr>
+    <td>
+      Max. Connection
+    </td>
+    <td>
+      <select id="max_conn">
+        <option value="4">4</option>
+        <option value="5" selected="selected">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+      </select>
+    </td>
+    <td>
+       &nbsp  &nbsp
+    </td>
+    <td>
+      Product Id
+    </td>
+    <td>
+      <input id="prod_id" type="text">
+    </td>
+    <td>
+      <input type="button", value="Submit", onclick="updateViz();">
+    </td>
+    <td>
+      <img src="/static/index.fidget-spinner.gif" id="loader" style="width:20px;height:20px;">
+    </td>
+  </tr>
+  </table>
+</div>
+<!-- <div id="svg"> -->
+</div>
+  <!-- <script src="bidirectional_tree.js"></script> -->
+
+</body>
+<!-- New plot -->
+
+
+  <script src="static/tree_script.js"></script>
+  <link rel="stylesheet" href="static/style.css">
+  </html>

@@ -1,0 +1,31 @@
+{
+  "name": "Product",
+  "time":"current",
+  "children": [
+    { "name": "Level 2: C","time":"before","pct":50},
+    {
+      "name": "left A",
+      "time":"before",
+      "pct":20,
+      "children": [
+        { "name": "Son of A" ,
+        "time":"before",
+        "pct":20,
+        "children":[{"name": "Level 3: D","time":"before","pct":80}]
+      },
+        { "name": "Daughter of A" ,"time":"before","pct":10}
+      ]
+    },
+    { "name": "Level 2: B","time":"before","pct":30 },
+    {
+      "name": "right A_R",
+      "time":"after",
+      "pct":40,
+      "children": [
+        { "name": "Son of A_R" ,"time":"after","pct":50},
+        { "name": "Daughter of A_R" ,"time":"after","pct":30}
+      ]
+    },
+    { "name": "Level 2: B_R","time":"after" ,"pct":30}
+  ]
+}
