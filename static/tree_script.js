@@ -68,6 +68,23 @@ var margin = {top: 20, right: 90, bottom: 30, left: 90},
     width = 1260 - margin.left - margin.right,
     height = 600 - margin.top - margin.bottom;
 
+var menu = [
+    {
+    	title: 'Explore',
+    	action: function(elm, d, i) {
+        document.getElementById('prod_id').value = d.data.name;
+        updateViz();
+    	}
+    },
+    {
+    	title: 'Item #2',
+    	action: function(elm, d, i) {
+        console.log('You have clicked the second item!');
+    	   console.log('The data for this circle is: ' + d);
+    	}
+    }
+  ]
+
 var colorScale = d3.scaleLinear()
         .domain([0, 1])
     		.range(['red', 'green']);
@@ -183,14 +200,15 @@ function update(source) {
             div	.html("Common User Rating: "+d.data.avg_rating+"<br/>"+
                     "Overall Rating: "+d.data.avg_rating+"<br>"+
                   "Total Reviews : "+d.data.total_revs)
-                .style("left", (d3.event.pageX) + "px")
+                .style("left", (d3.event.pageX+10) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
             })
         .on("mouseout", function(d) {
             div.transition()
                 .duration(500)
                 .style("opacity", 0);
-        });
+        })
+        .on('contextmenu', d3.contextMenu(menu));
     // .on("mouseover", function(d) {
     //       var g = d3.select(this); // The node
     //       // The class is used to remove the additional text later
@@ -223,9 +241,9 @@ function update(source) {
       .attr("dy", ".35em")
       .attr("x", function(d) {
           if(d.data.time=="before"){
-             return d.children || d._children ?  viewScale(d.data.total_revs):-viewScale(d.data.total_revs);
+             return d.children || d._children ?  (3+viewScale(d.data.total_revs)):-(3+viewScale(d.data.total_revs));
            }else{
-               return d.children || d._children ? -viewScale(d.data.total_revs) : viewScale(d.data.total_revs);
+               return d.children || d._children ? -(3+viewScale(d.data.total_revs)) : (3+viewScale(d.data.total_revs));
              }
       })
       .attr("text-anchor", function(d) {
