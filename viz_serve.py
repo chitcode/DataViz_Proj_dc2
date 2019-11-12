@@ -19,6 +19,7 @@ cd_data = None
 cd_data = pd.read_csv(path.join(FILE_PATH,"CDs_and_Vinyl_5.csv.gz"))
 cd_data.columns = [c.strip() for c in cd_data.columns]
 data_cache = {}
+ratting_cache = {}
 print("data loaded")
 
 @app.route('/')
@@ -37,10 +38,13 @@ def init():
     with open(path.join(FILE_PATH,"graph_cache.txt"),'a+') as f:
         f.seek(0)
         for line in f:
-            cached_line = json.loads(line)
-            k = cached_line["key"]
-            v = cached_line["result"]
-            data_cache[k]= v
+            try:
+                cached_line = json.loads(line)
+                k = cached_line["key"]
+                v = cached_line["result"]
+                data_cache[k]= v
+            except Exception as e:
+                print(e)
 
     #cd_data.columns = [c.strip() for c in cd_data.columns]
     # cd_meta = {}
@@ -94,6 +98,35 @@ def get_time_series():
         try:
             ts_data = calcualte_moving_averages_single(prodId)
             return ts_data
+        except Exception as e:
+            print(e)
+            return jsonify({"error":"error"})
+            raise(e)
+    else:
+        return {"error":"error"}
+
+@app.route('/getRattings',methods=['GET'])
+def ratingCorr():
+    prodId = request.args.get("prodId", None)
+    if prodId != None:
+        try:
+            if prodId in ratting_cache:
+                return json.dumps(ratting_cache[prodId])
+
+            reviewer_df = get_reviewers(prodId)
+            user_rattings = []
+            for reviewer_id in reviewer_df.reviewerID.values:
+                prod_rat = np.mean(reviewer_df.overall.values[reviewer_df.reviewerID == reviewer_id])
+                avg_rat = np.mean(cd_data.overall.values[cd_data.reviewerID == reviewer_id])
+                rev_count = int(np.sum(cd_data.reviewerID == reviewer_id))
+
+                user_rattings.append({"rev_id":reviewer_id,
+                                     "prod_rat":round(prod_rat,2),
+                                     "avg_rat":round(avg_rat,2),
+                                     "rev_count":rev_count}
+                                    )
+            ratting_cache[prodId] = user_rattings
+            return json.dumps(user_rattings)
         except Exception as e:
             print(e)
             return jsonify({"error":"error"})
@@ -181,8 +214,8 @@ def get_nodes_json(prod_id,max_nodes=5):
             np.logical_and(cd_data.asin == next_item,
                            cd_data.reviewerID.isin(reviers_df.reviewerID.values))]
         prod_avg_rating = np.mean(sel_prod_user_df.overall)
-        prod_avg_all_rating = np.mean(cd_data.overall.values[cd_data.asin == prev_item])
-        total_revs = len(cd_data.overall.values[cd_data.asin == prev_item])
+        prod_avg_all_rating = np.mean(cd_data.overall.values[cd_data.asin == next_item])
+        total_revs = len(cd_data.overall.values[cd_data.asin == next_item])
         more_children = get_chidren(sel_prod_user_df,prev=False,max_nodes=max_nodes)
         after_children.append({'name':next_item,"time":"after","pct":round(100*aft_counts/next_items_total),
                         "avg_rating":round(prod_avg_rating,2),

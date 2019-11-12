@@ -13,7 +13,7 @@ function updateViz(){
     loading();
     request.onreadystatechange = (e) => {
       treeData = JSON.parse(request.responseText);
-      console.log(treeData);
+      //console.log(treeData);
       if(!treeData["error"]){
         loading();
         document.getElementById("loader").style.display = "none";
@@ -50,16 +50,6 @@ var update_ts = function(prod_id){
   request.open("GET", url);
   request.send();
 
-  //var ts_data;
-  // request.onreadystatechange = (e) => {
-  //   ts_data = JSON.parse(request.responseText);
-  //   console.log(ts_data);
-  //   if(!ts_data["error"]){
-  //     //update_ts_i(ts_data);
-  //   }else{
-  //     alert("Sorry!! Product Not Found");
-  //   }
-  // }
 
 }
 
@@ -70,17 +60,34 @@ var margin = {top: 20, right: 90, bottom: 30, left: 90},
 
 var menu = [
     {
-    	title: 'Explore',
+    	title: 'Explore Product',
     	action: function(elm, d, i) {
         document.getElementById('prod_id').value = d.data.name;
         updateViz();
     	}
     },
     {
-    	title: 'Item #2',
+    	title: 'Explore Rating',
     	action: function(elm, d, i) {
-        console.log('You have clicked the second item!');
-    	   console.log('The data for this circle is: ' + d);
+        var request = new XMLHttpRequest();
+        const url='/getRattings?prodId='+d.data.name;
+        console.log(url);
+        request.open("GET", url);
+        request.send();
+        loading();
+        request.onreadystatechange = (e) => {
+          scatterData = JSON.parse(request.responseText);
+          //console.log(treeData);
+          if(!treeData["error"]){
+            loading();
+            document.getElementById("loader").style.display = "none";
+            scatterVizFunc(d.data.name,scatterData);
+          }else{
+            loading();
+            document.getElementById("loader").style.display = "none";
+            alert("Sorry!! Product Not Found");
+          }
+        }
     	}
     }
   ]
@@ -97,18 +104,11 @@ var viewScale = d3.scaleLog()
         .domain([1,400])
         .range([9,25]);
 
-// var ratingScale1 = d3.schemeRdYlGn();
-
-// Define the div for the tooltip
-// var div = d3.select("body").append("div")
-//             .attr("class", "tooltip")
-//             .style("opacity", 0);
-
 var center = {left:width/2,height:height/2}
 // append the svg object to the body of the page
 // appends a 'group' element to 'svg'
 // moves the 'group' element to the top left margin
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#treeViz").append("svg")
     .attr("width", width + margin.right + margin.left)
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
@@ -197,7 +197,8 @@ function update(source) {
             div.transition()
                 .duration(200)
                 .style("opacity", .9);
-            div	.html("Common User Rating: "+d.data.avg_rating+"<br/>"+
+            div	.html("Comapre with "+prod_id+"<hr/>"+
+                  "Common User Rating: "+d.data.avg_rating+"<br/>"+
                     "Overall Rating: "+d.data.avg_rating+"<br>"+
                   "Total Reviews : "+d.data.total_revs)
                 .style("left", (d3.event.pageX+10) + "px")
@@ -209,21 +210,6 @@ function update(source) {
                 .style("opacity", 0);
         })
         .on('contextmenu', d3.contextMenu(menu));
-    // .on("mouseover", function(d) {
-    //       var g = d3.select(this); // The node
-    //       // The class is used to remove the additional text later
-    //       var info = g.append('text')
-    //          .classed('info', true)
-    //          .attr('x', 20)
-    //          .attr('y', 30)
-    //          .text(function(d){ return("Total Reviews : "+d.data.total_revs+"\n"+
-    //        "Common User Rating: "+d.data.avg_rating+"\n"+
-    //        "Overall Rating: "+d.data.avg_rating)});
-    //   })
-    //   .on("mouseout", function() {
-    //       // Remove the info text on mouse out.
-    //       d3.select(this).select('text.info').remove();
-    //     });
 
   // Add Circle for the nodes
   nodeEnter.append('circle')
@@ -366,23 +352,6 @@ nodeEnter.append('line')
                   .duration(500)
                   .style("opacity", 0);
           });
-      // .on("mouseover", function(d) {
-      //       var g = d3.select(this); // The node
-      //       // The class is used to remove the additional text later
-      //       var info = g.append('text')
-      //          .classed('info', true)
-      //          .attr('x', 20)
-      //          .attr('y', 10)
-      //          .text(function(d){ return(d.data.pct+"%")})
-      //   })
-      //   .on("mouseout", function() {
-      //       // Remove the info text on mouse out.
-      //       d3.select(this).select('text.info').remove();
-      //     });
-      // .append("svg:title")
-      // .text(function(d) { return d.data.pct; });
-
-
   // UPDATE
   var linkUpdate = linkEnter.merge(link);
 
@@ -457,15 +426,15 @@ nodeEnter.append('line')
     .attr("text-anchor", "start")
     .attr("x", 4)//padding of 4px
     .attr("y", 14)
-    .text(">>   After  >>")
-    .style("stroke", "#5f6769");
+    .text("   After  >>")
+    .style("stroke", "#6b7b8e");
 
   svg.append("text")
     .attr("text-anchor", "end")
     .attr("x", -4)//padding of 4px
     .attr("y", 14)
-    .text("<<  Before   <<")
-    .style("stroke", "#5f6769");
+    .text("<<  Before   ")
+    .style("stroke", "#6b7b8e");
   // .attr("class", "text")
   // .text(function(d){return "Before"})
   // .attr("x", function(d) { -50 })
@@ -481,44 +450,86 @@ var div = d3.select("body").append("div")
 }
 
 
-
 // //////////////////////////////////////New Chart/////////
-// d3.select("body").append("svg").attr("id","timeseriesChart")
-//   .attr("width",width + margin.right + margin.left);
-//
-//
-// var chart = bb.generate({
-//     data: {
-//       x: "x",
-//        columns: [
-//   	// ["x", "2013-01-01", "2013-01-02", "2013-01-03", "2013-01-04", "2013-01-05", "2013-01-06"],
-//   	// ["data1", 30, 200, 100, 400, 150, 250],
-//   	// ["data2", 130, 340, 200, 500, 250, 350]
-//        ]
-//     },
-//     axis: {
-//       x: {
-//         type: "timeseries",
-//         tick: {
-//           rotate: 75,
-//           multiline: false,
-//           tooltip: true,
-//           format: "%Y-%m-%d"
-//         }
-//       },
-//       y: {
-//       tick: {
-//         values: [0,1,2,3,4,5]
-//       }
-//     }
-//     },
-//     bindto: "#timeseriesChart"
-//   });
-//
-// function update_ts_i(data){
-//    setTimeout(function() {
-//   	chart.load(data);
-//   }, 1000);
-// }
-  // call some API
-  //chart.load( ... );
+// set the dimensions and margins of the graph
+
+var scatter_margin = {top: 30, right: 30, bottom: 50, left: 60},
+    scatter_width = 460 - scatter_margin.left - scatter_margin.right,
+    scatter_height = 400 - scatter_margin.top - scatter_margin.bottom;
+// append the svg object to the body of the page
+var scatter_svg = d3.select("#scatterViz")
+  .append("svg")
+    .attr("width", scatter_width + scatter_margin.left + scatter_margin.right)
+    .attr("height", scatter_height + scatter_margin.top + scatter_margin.bottom)
+    .append("g")
+    .attr("transform",
+          "translate(" + scatter_margin.left + "," + scatter_margin.top + ")");
+
+  var x = d3.scaleLinear()
+      .domain([0, 5])
+      .range([ 0, scatter_width ]);
+
+  var y = d3.scaleLinear()
+      .domain([0, 5])
+      .range([ scatter_height, 0]);
+
+  var ptSizeScale = d3.scaleLog()
+      .domain([1, 300])
+      .range([3,10]);
+
+  var scatterVizFunc = function(c_prod_id,corr_data){
+    //console.log(corr_data);
+
+    scatter_svg.selectAll("circle")
+    .remove()
+    .exit()
+    .transition()
+    .duration(700);
+
+    scatter_svg.selectAll("circle")
+      .data(corr_data)
+      .enter()
+      .append("circle")
+      .transition()
+      .duration(700)
+        .attr("cx", function (d) { return x(d.avg_rat); } )
+        .attr("cy", function (d) { return y(d.prod_rat); } )
+        .attr("r", function(d){ return ptSizeScale(d.rev_count)})
+        .style("fill",function(d){
+          return d3.interpolateRdYlGn(0.5+ 2*(d.prod_rat-d.avg_rat)/d.prod_rat)})
+        .style("opacity", .4);
+
+    scatter_svg.selectAll("text")
+        .remove()
+        .transition()
+        .duration(700);
+
+    // Add X axis
+    scatter_svg.append("g")
+        .attr("transform", "translate(0," + scatter_height + ")")
+        .call(d3.axisBottom(x));
+          // text label for the x axis
+
+    scatter_svg.append("text")
+        .attr("transform",
+              "translate(" + (scatter_width/2) + " ," +
+                             (scatter_height + scatter_margin.bottom-8) + ")")
+        .style("text-anchor", "middle")
+        .text("Average Rating (All Products)");
+
+    // Add Y axis
+    scatter_svg.append("g")
+      .call(d3.axisLeft(y));
+      // text label for the y axis
+
+  var left_text = scatter_svg.data([c_prod_id+" Rating"]).append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - scatter_margin.left)
+      .attr("x",0 - (scatter_height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text(function(d){return d;})
+      .transition()
+      .duration(700);
+
+  }
