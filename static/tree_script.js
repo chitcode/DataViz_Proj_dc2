@@ -201,7 +201,7 @@ function update(source) {
                     "Common Reviewers : "+d.data.common_user_count+"<br>"+
                     "Common User Rating: "+d.data.avg_rating+"<br/>"+
                     "Total Reviewers : "+d.data.total_revs+"<br>"+
-                    "Overall Rating: "+d.data.avg_rating)
+                    "Overall Rating: "+d.data.overall_rating)
                 .style("left", (d3.event.pageX+10) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
             })
