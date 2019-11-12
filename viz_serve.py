@@ -173,18 +173,27 @@ def get_chidren(prod_users_df,prev=True,max_nodes=5):
         sel_prod_user_df = cd_data.loc[
             np.logical_and(cd_data.asin == sel_item,
                            cd_data.reviewerID.isin(prod_users_df.reviewerID.values))]
+        common_user_count = len(sel_prod_user_df.overall)
         prod_avg_rating = np.mean(sel_prod_user_df.overall)
         prod_avg_all_rating = np.mean(cd_data.overall.values[cd_data.asin == sel_item])
         total_revs = len(cd_data.overall.values[cd_data.asin == sel_item])
+        pct = 100
+        if prev:
+            pct = round(100*sel_counts/total_revs)
+        else:
+            pct = round(100*sel_counts/sel_items_total)
         children.append({'name':sel_item,"time":time_,
-                         "pct":round(100*sel_counts/sel_items_total),
+                         "pct":pct,
+                         "move_count":sel_counts,
                         "avg_rating":round(prod_avg_rating,2),
                         "overall_rating":round(prod_avg_all_rating,2),
-                        "total_revs":total_revs})
+                        "total_revs":total_revs,
+                        "common_user_count":common_user_count})
     return children
 
 def get_nodes_json(prod_id,max_nodes=5):
     reviers_df = get_reviewers(prod_id)
+    rev_counts = len(reviers_df)
     prev_items = get_prev_next_buy(reviers_df,prev=True)
     prev_items_total = len(prev_items)
     prev_items = Counter(prev_items).most_common(max_nodes)
@@ -201,27 +210,36 @@ def get_nodes_json(prod_id,max_nodes=5):
                            cd_data.reviewerID.isin(reviers_df.reviewerID.values))]
         prod_avg_rating = np.mean(sel_prod_user_df.overall)
         prod_avg_all_rating = np.mean(cd_data.overall.values[cd_data.asin == prev_item])
+        common_user_count = len(sel_prod_user_df.overall)
         total_revs = len(cd_data.overall.values[cd_data.asin == prev_item])
         more_children = get_chidren(sel_prod_user_df,prev=True,max_nodes=max_nodes)
+        pct = round(100*prev_counts/total_revs)
         before_children.append({'name':prev_item,"time":"before",
-                         "pct":round(100*prev_counts/prev_items_total),
+                         "pct":pct,
+                         "move_count":prev_counts,
                         "avg_rating":round(prod_avg_rating,2),
                          "overall_rating":round(prod_avg_all_rating,2),
                          "children":more_children,
-                        "total_revs":total_revs})
+                        "total_revs":total_revs,
+                        "common_user_count":common_user_count})
     for next_item,aft_counts in next_items:
         sel_prod_user_df = cd_data.loc[
             np.logical_and(cd_data.asin == next_item,
                            cd_data.reviewerID.isin(reviers_df.reviewerID.values))]
         prod_avg_rating = np.mean(sel_prod_user_df.overall)
+        common_user_count = len(sel_prod_user_df.overall)
         prod_avg_all_rating = np.mean(cd_data.overall.values[cd_data.asin == next_item])
         total_revs = len(cd_data.overall.values[cd_data.asin == next_item])
         more_children = get_chidren(sel_prod_user_df,prev=False,max_nodes=max_nodes)
-        after_children.append({'name':next_item,"time":"after","pct":round(100*aft_counts/next_items_total),
+        pct =round(100*aft_counts/next_items_total)
+        after_children.append({'name':next_item,"time":"after",
+                               "pct":pct,
+                        "move_count":aft_counts,
                         "avg_rating":round(prod_avg_rating,2),
                          "overall_rating":round(prod_avg_all_rating,2),
                          "children":more_children,
-                        "total_revs":total_revs})
+                        "total_revs":total_revs,
+                        "common_user_count":common_user_count})
 
     for i in range(max(len(before_children),len(after_children))):
         if i < len(before_children):
@@ -231,7 +249,8 @@ def get_nodes_json(prod_id,max_nodes=5):
     #random.shuffle(children)
     node = {"name":prod_id,"time":"current","children":children,
             "avg_rating":round(np.mean(reviers_df.overall),2),
-           "total_revs":len(reviers_df.overall)}
+           "total_revs":len(reviers_df.overall),
+           "common_user_count":rev_counts}
     return node
 
 def calcualte_moving_averages_single(prod):

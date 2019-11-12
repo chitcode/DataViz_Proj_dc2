@@ -197,10 +197,11 @@ function update(source) {
             div.transition()
                 .duration(200)
                 .style("opacity", .9);
-            div	.html("Comapre with "+prod_id+"<hr/>"+
-                  "Common User Rating: "+d.data.avg_rating+"<br/>"+
-                    "Overall Rating: "+d.data.avg_rating+"<br>"+
-                  "Total Reviews : "+d.data.total_revs)
+            div	.html("Comapred with <br/><strong>"+prod_id+"</strong><hr/>"+
+                    "Common Reviewers : "+d.data.common_user_count+"<br>"+
+                    "Common User Rating: "+d.data.avg_rating+"<br/>"+
+                    "Total Reviewers : "+d.data.total_revs+"<br>"+
+                    "Overall Rating: "+d.data.avg_rating)
                 .style("left", (d3.event.pageX+10) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
             })
@@ -315,17 +316,31 @@ nodeEnter.append('line')
         return widthScale(d.data.pct)
       })
       .on("mouseover", function(d) {
-            var g = d3.select(this); // The node
-            // The class is used to remove the additional text later
-            var info = g.append('text')
-               .classed('info', true)
-               .attr('x', 20)
-               .attr('y', 10)
-               .text(function(d){return(d.data.pct)})
-        })
-        .on("mouseout", function() {
-            // Remove the info text on mouse out.
-            d3.select(this).select('text.info').remove();
+              div.transition()
+                  .duration(200)
+                  .style("opacity", .9);
+              if(d.data.time==="before"){
+              div	.html("Common Reviewers Between <br>"+
+                        "<strong>"+d.data.name+"</strong> and <strong>"+d.parent.data.name+"</strong><br>"+
+                        "[Also Reviewed "+prod_id+"]<hr/>"+
+                        "Count :"+d.data.move_count+"<br>"+
+                        "Percent :"+d.data.pct+"% of "+ d.data.name)
+                  .style("left", (d3.event.pageX) + "px")
+                  .style("top", (d3.event.pageY - 28) + "px");
+                }else{
+                  div	.html("Common Reviewers Between <br>"+
+                            "<strong>"+d.data.name+"</strong> and <strong>"+d.parent.data.name+"</strong><br>"+
+                            "[Also Reviewed "+prod_id+"]<hr/>"+
+                            "Count :"+d.data.move_count+"<br>"+
+                            "Percent :"+d.data.pct+"% of "+d.parent.data.name)
+                      .style("left", (d3.event.pageX) + "px")
+                      .style("top", (d3.event.pageY - 28) + "px");
+                }
+              })
+          .on("mouseout", function(d) {
+              div.transition()
+                  .duration(500)
+                  .style("opacity", 0);
           });
 
 
@@ -343,9 +358,23 @@ nodeEnter.append('line')
               div.transition()
                   .duration(200)
                   .style("opacity", .9);
-              div	.html(d.data.pct+"%")
+              if(d.data.time==="before"){
+              div	.html("Common Reviewers Between <br>"+
+                        "<strong>"+d.data.name+"</strong> and <strong>"+d.parent.data.name+"</strong><br>"+
+                        "[Also Reviewed "+prod_id+"]<hr/>"+
+                        "Count :"+d.data.move_count+"<br>"+
+                        "Percent :"+d.data.pct+"% of "+ d.data.name)
                   .style("left", (d3.event.pageX) + "px")
                   .style("top", (d3.event.pageY - 28) + "px");
+                }else{
+                  div	.html("Common Reviewers Between <br>"+
+                            "<strong>"+d.data.name+"</strong> and <strong>"+d.parent.data.name+"</strong><br>"+
+                            "[Also Reviewed "+prod_id+"]<hr/>"+
+                            "Count :"+d.data.move_count+"<br>"+
+                            "Percent :"+d.data.pct+"% of "+d.parent.data.name)
+                      .style("left", (d3.event.pageX) + "px")
+                      .style("top", (d3.event.pageY - 28) + "px");
+                }
               })
           .on("mouseout", function(d) {
               div.transition()
@@ -358,7 +387,8 @@ nodeEnter.append('line')
   // Transition back to the parent element position
   linkUpdate.transition()
       .duration(duration)
-      .attr('d', function(d){ return diagonal(d, d.parent) });
+      .attr('d', function(d){ return diagonal(d, d.parent) })
+
 
   // Remove any exiting links
   var linkExit = link.exit().transition()
