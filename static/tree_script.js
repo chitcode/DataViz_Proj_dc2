@@ -474,7 +474,7 @@ nodeEnter.append('line')
 
   //tooltip
   // Define the div for the tooltip
-var div = d3.select("body").append("div")
+var div = d3.select("#maintooltip")
     .attr("class", "tooltip")
     .style("opacity", 0);
 }
@@ -482,6 +482,10 @@ var div = d3.select("body").append("div")
 
 // //////////////////////////////////////New Chart/////////
 // set the dimensions and margins of the graph
+
+var scattertooltip = d3.select("#scattertooltip")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
 
 var scatter_margin = {top: 30, right: 30, bottom: 50, left: 60},
     scatter_width = 460 - scatter_margin.left - scatter_margin.right,
@@ -516,12 +520,10 @@ var scatter_svg = d3.select("#scatterViz")
     .transition()
     .duration(700);
 
-    scatter_svg.selectAll("circle")
+    dots = scatter_svg.selectAll("circle")
       .data(corr_data)
       .enter()
       .append("circle")
-      .transition()
-      .duration(700)
         .attr("cx", function (d) { return x(d.avg_rat); } )
         .attr("cy", function (d) { return y(d.prod_rat); } )
         .attr("r", function(d){ return ptSizeScale(d.rev_count)})
@@ -529,10 +531,34 @@ var scatter_svg = d3.select("#scatterViz")
           return d3.interpolateRdYlGn(0.5+ 2*(d.prod_rat-d.avg_rat)/d.prod_rat)})
         .style("opacity", .4);
 
+      dots.on("mouseover", function(d) {
+                scattertooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                scattertooltip	.html("Rating All Products :"+d.avg_rat+"<br/>"+
+                          "Rating for "+c_prod_id+" :"+d.prod_rat+"<br/>"+
+                          "Total Number of Reviews "+d.rev_count)
+                    .style("left", (d3.event.pageX+10) + "px")
+                    .style("top", (d3.event.pageY - 28) + "px");
+                })
+            .on("mouseout", function(d) {
+                scattertooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+
     scatter_svg.selectAll("text")
         .remove()
         .transition()
         .duration(700);
+
+    scatter_svg.append("text")
+             .attr("x", (scatter_width / 2))
+             .attr("y", 0 - (scatter_margin.top / 2))
+             .attr("text-anchor", "middle")
+             .style("font-size", "12px")
+             .style("text-decoration", "underline")
+             .text("Ratings By Reviewers of "+c_prod_id);
 
     // Add X axis
     scatter_svg.append("g")
