@@ -97,8 +97,8 @@ var colorScale = d3.scaleLinear()
     		.range(['red', 'green']);
 
 var widthScale = d3.scaleLinear()
-    		.domain([1,100])
-    		.range([1, 10]);
+    		.domain([1,300])
+    		.range([1, 15]);
 
 var viewScale = d3.scaleLog()
         .domain([1,400])
@@ -198,7 +198,7 @@ function update(source) {
                 .duration(200)
                 .style("opacity", .9);
             div	.html("Comapred with <br/><strong>"+prod_id+"</strong><hr/>"+
-                    "Common Reviewers : "+d.data.common_user_count+"<br>"+
+                    "Common Reviewers : "+d.data.move_count+"<br>"+
                     "Common User Rating: "+d.data.avg_rating+"<br/>"+
                     "Total Reviewers : "+d.data.total_revs+"<br>"+
                     "Overall Rating: "+d.data.overall_rating)
@@ -217,7 +217,7 @@ function update(source) {
       .attr('class', 'node')
       .attr('r', 1e-6)
       .style("stroke", function(d){
-        return d3.interpolateRdYlGn(0.5+ 2*(d.data.avg_rating-d.data.overall_rating)/d.data.avg_rating)})
+        return d3.interpolateRdYlGn(0.5+ 2*(d.data.path_user_rat-d.data.overall_rating)/d.data.path_user_rat)})
       //.style("stroke", function(d){return chart.color(d.data.name)})
       .style("fill", function(d) {
           return d._children ? "lightsteelblue" : "#fff";
@@ -250,7 +250,7 @@ function update(source) {
       .attr("text-anchor", "middle")
       .attr("x",0)
       .attr("y", -3)
-      .text(function(d) { return d.data.avg_rating; });
+      .text(function(d) { return d.data.path_user_rat; });
 
   nodeEnter.append('text')
       .attr("dy", "0em")
@@ -313,7 +313,7 @@ nodeEnter.append('line')
   var link = svg.selectAll('path.link')
       .data(links, function(d) { return d.id; })
       .style('stroke-width', function(d){
-        return widthScale(d.data.pct)
+        return widthScale(d.data.move_count)
       })
       .on("mouseover", function(d) {
               div.transition()
@@ -352,7 +352,7 @@ nodeEnter.append('line')
         return diagonal(o, o)
       })
       .style('stroke-width', function(d){
-        return widthScale(d.data.pct)
+        return widthScale(d.data.move_count)
       })
       .on("mouseover", function(d) {
               div.transition()

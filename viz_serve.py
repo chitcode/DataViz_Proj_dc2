@@ -140,29 +140,43 @@ def get_reviewers(prod_id):
 
 def get_prev_next_buy(df_reviews,prev = True):#takes dataframe filtered for productid
     items = []
-    print("df_reviews.reviewerID")
-    print(df_reviews.columns)
-    for reviewer,review_date in zip(df_reviews.loc[:,"reviewerID"],df_reviews.unixReviewTime):
+    item_avg_rev_dict = {}
+    item_all_rev_dict = {}
+    for reviewer,review_date in zip(df_reviews.reviewerID,df_reviews.unixReviewTime):
         if prev:
-
             user_prev_prod = cd_data.loc[np.logical_and(cd_data.reviewerID == reviewer,
                                                         cd_data.unixReviewTime < review_date)].copy()
 
             if(len(user_prev_prod) > 0):
                 user_prev_prod.sort_values("unixReviewTime", inplace=True,ascending=False)
-                items.append(user_prev_prod.asin.values[0])
+                _p = user_prev_prod.asin.values[0]
+                _r = user_prev_prod.overall.values[0]
+                items.append(_p)
+                if _p in item_all_rev_dict:
+                    item_all_rev_dict[_p] = _r
+                else:
+                    item_all_rev_dict[_p] = [_r]
         else:
             user_prev_prod = cd_data.loc[np.logical_and(cd_data.reviewerID == reviewer,
                                                         cd_data.unixReviewTime > review_date)].copy()
 
             if(len(user_prev_prod) > 0):
                 user_prev_prod.sort_values("unixReviewTime", inplace=True,ascending=True)
-                items.append(user_prev_prod.asin.values[0])
+                _p = user_prev_prod.asin.values[0]
+                _r = user_prev_prod.overall.values[0]
+                items.append(_p)
+                if _p in item_all_rev_dict:
+                    item_all_rev_dict[_p] = _r
+                else:
+                    item_all_rev_dict[_p] = [_r]
 
-    return items
+    for k,v in item_all_rev_dict.items():
+        item_avg_rev_dict[k] = [0,round(np.mean(v),2)]
+
+    return items,item_avg_rev_dict
 
 def get_chidren(prod_users_df,prev=True,max_nodes=5):
-    sel_items = get_prev_next_buy(prod_users_df,prev=prev)
+    sel_items,sel_items_count_rats = get_prev_next_buy(prod_users_df,prev=prev)
     sel_items_total = len(sel_items)
     sel_items = Counter(sel_items).most_common(max_nodes)
     time_ = "after"
@@ -185,6 +199,7 @@ def get_chidren(prod_users_df,prev=True,max_nodes=5):
         children.append({'name':sel_item,"time":time_,
                          "pct":pct,
                          "move_count":sel_counts,
+                         "path_user_rat":sel_items_count_rats[sel_item][1],
                         "avg_rating":round(prod_avg_rating,2),
                         "overall_rating":round(prod_avg_all_rating,2),
                         "total_revs":total_revs,
@@ -194,11 +209,11 @@ def get_chidren(prod_users_df,prev=True,max_nodes=5):
 def get_nodes_json(prod_id,max_nodes=5):
     reviers_df = get_reviewers(prod_id)
     rev_counts = len(reviers_df)
-    prev_items = get_prev_next_buy(reviers_df,prev=True)
+    prev_items,prev_prod_avg_rat = get_prev_next_buy(reviers_df,prev=True)
     prev_items_total = len(prev_items)
     prev_items = Counter(prev_items).most_common(max_nodes)
 
-    next_items = get_prev_next_buy(reviers_df,prev=False)
+    next_items,next_prod_avg_rat = get_prev_next_buy(reviers_df,prev=False)
     next_items_total = len(next_items)
     next_items = Counter(next_items).most_common(max_nodes)
     before_children = []
@@ -217,6 +232,7 @@ def get_nodes_json(prod_id,max_nodes=5):
         before_children.append({'name':prev_item,"time":"before",
                          "pct":pct,
                          "move_count":prev_counts,
+                         "path_user_rat":prev_prod_avg_rat[prev_item][1],
                         "avg_rating":round(prod_avg_rating,2),
                          "overall_rating":round(prod_avg_all_rating,2),
                          "children":more_children,
@@ -235,6 +251,7 @@ def get_nodes_json(prod_id,max_nodes=5):
         after_children.append({'name':next_item,"time":"after",
                                "pct":pct,
                         "move_count":aft_counts,
+                        "path_user_rat":next_prod_avg_rat[next_item][1],
                         "avg_rating":round(prod_avg_rating,2),
                          "overall_rating":round(prod_avg_all_rating,2),
                          "children":more_children,
@@ -248,6 +265,7 @@ def get_nodes_json(prod_id,max_nodes=5):
             children.append(after_children[i])
     #random.shuffle(children)
     node = {"name":prod_id,"time":"current","children":children,
+            "path_user_rat":round(np.mean(reviers_df.overall),2),
             "avg_rating":round(np.mean(reviers_df.overall),2),
            "total_revs":len(reviers_df.overall),
            "common_user_count":rev_counts}
