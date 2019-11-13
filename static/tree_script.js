@@ -97,8 +97,8 @@ var colorScale = d3.scaleLinear()
     		.range(['red', 'green']);
 
 var widthScale = d3.scaleLinear()
-    		.domain([1,300])
-    		.range([1, 15]);
+    		.domain([1,50])
+    		.range([1,10]);
 
 var viewScale = d3.scaleLog()
         .domain([1,400])
@@ -199,7 +199,7 @@ function update(source) {
                 .style("opacity", .9);
             div	.html("Comapred with <br/><strong>"+prod_id+"</strong><hr/>"+
                     "Common Reviewers : "+d.data.move_count+"<br>"+
-                    "Common User Rating: "+d.data.avg_rating+"<br/>"+
+                    "Common User Rating: "+d.data.path_user_rat+"<br/>"+
                     "Total Reviewers : "+d.data.total_revs+"<br>"+
                     "Overall Rating: "+d.data.overall_rating)
                 .style("left", (d3.event.pageX+10) + "px")
